@@ -7,7 +7,7 @@
 #include "main.h"
 #include "pcf8574.h"
 
-extern I2C_HandleTypeDef hi2c2;  // Replace with your I2C handle
+extern I2C_HandleTypeDef hi2c2;
 
 uint8_t PCF8574_Init()
 {
