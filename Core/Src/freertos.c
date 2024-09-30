@@ -40,7 +40,10 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+volatile uint32_t ulCPUUsage;
+volatile UBaseType_t uxHighWaterMark;
+volatile uint32_t ulIdleTickCount = 0;
+TaskHandle_t xIdleTaskHandle = NULL;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -64,7 +67,18 @@ const osThreadAttr_t LedTask_attributes = {
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
+void vCalculateCPUUsage() {
+    static uint32_t ulLastIdleTickCount = 0;
+    uint32_t ulCurrentIdleTickCount = ulIdleTickCount;
+    uint32_t ulIdleTicks = ulCurrentIdleTickCount - ulLastIdleTickCount;
+    ulLastIdleTickCount = ulCurrentIdleTickCount;
 
+    // 假设每秒调用�??次该函数
+    uint32_t ulTotalTicks = configTICK_RATE_HZ;
+    ulCPUUsage = 100 - (ulIdleTicks * 100 / ulTotalTicks);
+	uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+	printf("CPU Usage: %lu%%\nStack high water mark: %lu\n", ulCPUUsage, uxHighWaterMark);
+}
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void *argument);
@@ -72,6 +86,44 @@ void StartLedTask(void *argument);
 
 extern void MX_LWIP_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
+
+/* Hook prototypes */
+void vApplicationIdleHook(void);
+void vApplicationTickHook(void);
+
+/* USER CODE BEGIN 2 */
+void vApplicationIdleHook( void )
+{
+   /* vApplicationIdleHook() will only be called if configUSE_IDLE_HOOK is set
+   to 1 in FreeRTOSConfig.h. It will be called on each iteration of the idle
+   task. It is essential that code added to this hook function never attempts
+   to block in any way (for example, call xQueueReceive() with a block time
+   specified, or call vTaskDelay()). If the application makes use of the
+   vTaskDelete() API function (as this demo application does) then it is also
+   important that vApplicationIdleHook() is permitted to return to its calling
+   function, because it is the responsibility of the idle task to clean up
+   memory allocated by the kernel to any task that has since been deleted. */
+    if( xIdleTaskHandle == NULL )
+    {
+        /* Store the handle to the idle task. */
+    	xIdleTaskHandle = xTaskGetCurrentTaskHandle();
+    }
+}
+/* USER CODE END 2 */
+
+/* USER CODE BEGIN 3 */
+void vApplicationTickHook( void )
+{
+   /* This function will be called by each tick interrupt if
+   configUSE_TICK_HOOK is set to 1 in FreeRTOSConfig.h. User code can be
+   added here, but the tick hook is called from an interrupt context, so
+   code must not attempt to block, and only the interrupt safe FreeRTOS API
+   functions can be used (those that end in FromISR()). */
+	if (xTaskGetCurrentTaskHandle() == xIdleTaskHandle) {
+		ulIdleTickCount++;
+	}
+}
+/* USER CODE END 3 */
 
 /**
   * @brief  FreeRTOS initialization
@@ -134,7 +186,7 @@ void StartDefaultTask(void *argument)
   {
 	osDelay(500);
 	HAL_GPIO_TogglePin(LED_1_GPIO_Port, LED_1_Pin);
-	printf("LED1\n");
+	//printf("LED1\n");
   }
   /* USER CODE END StartDefaultTask */
 }
@@ -152,8 +204,8 @@ void StartLedTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(250);
-    HAL_GPIO_TogglePin(LED_0_GPIO_Port, LED_0_Pin);
+	vCalculateCPUUsage();
+	vTaskDelay(pdMS_TO_TICKS(1000));
   }
   /* USER CODE END StartLedTask */
 }
