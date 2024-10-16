@@ -108,9 +108,12 @@ int main(void)
   MX_USART1_UART_Init();
   MX_I2C2_Init();
   MX_FDCAN1_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  __HAL_RCC_D2SRAM3_CLK_ENABLE();
   __enable_irq();
   PCF8574_Init();
+  PCF8574_WritePin(RS485_RE_IO, GPIO_PIN_SET);
   HAL_Delay(100);
   PCF8574_WritePin(ETH_RESET_IO, GPIO_PIN_SET);
   HAL_Delay(100);
@@ -173,7 +176,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLM = 5;
   RCC_OscInitStruct.PLL.PLLN = 192;
   RCC_OscInitStruct.PLL.PLLP = 2;
-  RCC_OscInitStruct.PLL.PLLQ = 15;
+  RCC_OscInitStruct.PLL.PLLQ = 48;
   RCC_OscInitStruct.PLL.PLLR = 2;
   RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_2;
   RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;

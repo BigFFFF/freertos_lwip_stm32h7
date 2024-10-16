@@ -35,13 +35,24 @@ extern "C" {
 extern FDCAN_HandleTypeDef hfdcan1;
 
 /* USER CODE BEGIN Private defines */
+typedef struct {
+  FDCAN_TxHeaderTypeDef txHeader;
+  uint8_t data[8];
+} can_tx_msg_t, *can_tx_msg_p;
 
+typedef struct {
+  FDCAN_RxHeaderTypeDef rxHeader;
+  uint8_t data[8];
+} can_rx_msg_t, *can_rx_msg_p;
+
+extern can_tx_msg_t can_tx_msg;
+extern can_rx_msg_t can_rx_msg;
 /* USER CODE END Private defines */
 
 void MX_FDCAN1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+void CAN_Filter_Config(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
