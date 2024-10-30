@@ -100,7 +100,7 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
+  __HAL_RCC_D2SRAM3_CLK_ENABLE();
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -110,7 +110,6 @@ int main(void)
   MX_FDCAN1_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  __HAL_RCC_D2SRAM3_CLK_ENABLE();
   __enable_irq();
   PCF8574_Init();
   PCF8574_WritePin(RS485_RE_IO, GPIO_PIN_SET);

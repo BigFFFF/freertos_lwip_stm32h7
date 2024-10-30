@@ -25,7 +25,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "tcp_echoserver.h"
 #include "lwip/apps/lwiperf.h"
 #include "lwip.h"
 #include "usart.h"
@@ -246,7 +245,6 @@ void StartDefaultTask(void *argument)
   MX_LWIP_Init();
   /* USER CODE BEGIN StartDefaultTask */
   LOCK_TCPIP_CORE();
-  //tcp_echoserver_init();
   lwiperf_start_tcp_server_default(NULL, NULL);
   UNLOCK_TCPIP_CORE();
   /* Infinite loop */
@@ -348,20 +346,19 @@ void StartUart2Task(void *argument)
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
-int __io_putchar(int ch)
-{
-	char c = (char)ch;
-	osMessageQueuePut(Uart1QueueHandle, &c, 0, 0);
-	osMessageQueuePut(Uart2QueueHandle, &c, 0, 0);
-	return ch;
-}
-
 void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs) {
   if (hfdcan->Instance == FDCAN1 && (RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE) != RESET) {
 	  if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &can_rx_msg.rxHeader, can_rx_msg.data) == HAL_OK) {
 		  osMessageQueuePut(Can1QueueHandle, &can_rx_msg, 0, 0);
 	  }
   }
+}
+
+int __io_putchar(int ch) {
+    char c = (char)ch;
+    osMessageQueuePut(Uart1QueueHandle, &c, 0, 0);
+    osMessageQueuePut(Uart2QueueHandle, &c, 0, 0);
+    return ch;
 }
 /* USER CODE END Application */
 
