@@ -65,7 +65,7 @@ void MX_FDCAN1_Init(void)
   hfdcan1.Init.DataTimeSeg2 = 4;
   hfdcan1.Init.MessageRAMOffset = 0;
   hfdcan1.Init.StdFiltersNbr = 1;
-  hfdcan1.Init.ExtFiltersNbr = 0;
+  hfdcan1.Init.ExtFiltersNbr = 1;
   hfdcan1.Init.RxFifo0ElmtsNbr = 2;
   hfdcan1.Init.RxFifo0ElmtSize = FDCAN_DATA_BYTES_8;
   hfdcan1.Init.RxFifo1ElmtsNbr = 0;
@@ -177,5 +177,7 @@ void CAN_Filter_Config(void) {
 	sFilterConfig.FilterID2 = 0x1FFFDFFF;
 	sFilterConfig.RxBufferIndex = 0;
 	HAL_FDCAN_ConfigFilter(&hfdcan1, &sFilterConfig);
+
+	HAL_FDCAN_ConfigGlobalFilter(&hfdcan1, FDCAN_REJECT, FDCAN_REJECT, DISABLE, DISABLE);
 }
 /* USER CODE END 1 */
